@@ -14,6 +14,23 @@ Other Notable Changes:
 * Fixes a bug related to keyczar messing up encodings internally, resulting in decrypted
   messages coming out as empty strings.
 * AES Keys generated for use in accelerated mode are now 256-bit by default instead of 128.
+* Fix url fetching for SNI with python-2.7.9 or greater.  SNI does not work
+  with python < 2.7.9.  The best workaround is probably to use the command
+  module with curl or wget.
+* Fix url fetching to allow tls-1.1 and tls-1.2 if the system's openssl library
+  supports those protocols
+* Fix ec2_ami_search module to check TLS Certificates
+* Fix the following extras modules to check TLS Certificates:
+  * campfire
+  * layman
+  * librarto_annotate
+  * twilio
+  * typetalk
+* Fix docker module's parsing of docker-py version for dev checkouts
+* Fix docker module to work with docker server api 1.19
+* Change yum module's state=latest feature to update all packages specified in
+  a single transaction.  This is the same type of fix as was made for yum's
+  state=installed in 1.9.2 and both solves the same problems and with the same caveats.
 
 ## 1.9.2 "Dancing In the Street" - Jun 26, 2015
 
@@ -26,7 +43,7 @@ Other Notable Changes:
   Prior to this fix being applied these connection plugins didn't properly
   handle symlinks within the containers which could lead to files intended to
   be written to or read from the container being written to or read from the
-  host system instead. (CVE pending)
+  host system instead. (CVE-2015-6240)
 * Fixed a bug in the service module where init scripts were being incorrectly used instead of upstart/systemd.
 * Fixed a bug where sudo/su settings were not inherited from ansible.cfg correctly.
 * Fixed a bug in the rds module where a traceback may occur due to an unbound variable.
@@ -42,6 +59,12 @@ Other Notable Changes:
 * Fix bug disabling repositories in the yum module.
 * Fix giving yum module a url to install a package from on RHEL/CENTOS5
 * Fix bug in dnf module preventing it from working when yum-utils was not already installed
+* Change yum module to install all packages specified in a single transaction.
+  This fixes problems with dependencies between packages specified by filename
+  or URL.  However, if you are installing packages which install or modify repository
+  information (for instance, epel-release) then you may need to make a separate
+  task to install the package that modifies the repo otherwise the correct
+  repository information may not be available for other packages you are trying to install.
 
 ## 1.9.1 "Dancing In the Street" - Apr 27, 2015
 

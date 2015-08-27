@@ -230,9 +230,12 @@ class Runner(object):
                 self.transport = "paramiko"
             else:
                 # see if SSH can support ControlPersist if not use paramiko
-                cmd = subprocess.Popen(['ssh','-o','ControlPersist'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                (out, err) = cmd.communicate()
-                if "Bad configuration option" in err:
+                try:
+                    cmd = subprocess.Popen(['ssh','-o','ControlPersist'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    (out, err) = cmd.communicate()
+                    if "Bad configuration option" in err:
+                        self.transport = "paramiko"
+                except OSError:
                     self.transport = "paramiko"
 
         # save the original transport, in case it gets
@@ -1078,7 +1081,8 @@ class Runner(object):
 
             result.result['invocation'] = dict(
                 module_args=module_args,
-                module_name=module_name
+                module_name=module_name,
+                module_complex_args=complex_args,
             )
 
             changed_when = self.module_vars.get('changed_when')
@@ -1112,7 +1116,7 @@ class Runner(object):
                 self.callbacks.on_failed(host, data, ignore_errors)
             else:
                 if self.diff:
-                    self.callbacks.on_file_diff(conn.host, result.diff)
+                    self.callbacks.on_file_diff(host, result.diff)
                 self.callbacks.on_ok(host, data)
 
         return result
